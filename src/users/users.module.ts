@@ -7,6 +7,7 @@ import { User } from './user.entity';
 @Module({
   controllers: [UsersController],
   providers: [UsersService],
+  // TODO: MYSQLとの繋ぎこみ
   imports: [TypeOrmModule.forFeature([User])],
 })
 export class UsersModule {}
