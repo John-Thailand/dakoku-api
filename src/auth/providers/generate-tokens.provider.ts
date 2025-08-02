@@ -15,7 +15,6 @@ export class GenerateTokensProvider {
   ) {}
 
   private async signToken<T>(userId: string, expiresIn: number, payload?: T) {
-    console.log(this.jwtConfiguration.audience);
     return await this.jwtService.signAsync(
       // payload
       {
