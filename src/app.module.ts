@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/user.entity';
 import { AuthModule } from './auth/auth.module';
 
+// 環境変数名（NODE_ENV）を取得
 const ENV = process.env.NODE_ENV;
 
 @Module({
