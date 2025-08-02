@@ -190,4 +190,28 @@ export class UsersService {
 
     return user;
   }
+
+  public async findOneById(id: string) {
+    let user = undefined;
+
+    try {
+      user = await this.usersRepository.findOneBy({
+        id,
+        deleted_at: IsNull(),
+      });
+    } catch (error) {
+      throw new RequestTimeoutException(
+        'Unable to process your request at the moment please try later',
+        {
+          description: 'Error connecting to the database',
+        },
+      );
+    }
+
+    if (!user) {
+      throw new BadRequestException('the user does not exist');
+    }
+
+    return user;
+  }
 }

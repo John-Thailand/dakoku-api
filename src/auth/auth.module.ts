@@ -9,6 +9,7 @@ import { GenerateTokensProvider } from './providers/generate-tokens.provider';
 import { ConfigModule } from '@nestjs/config';
 import jwtConfig from './config/jwt.config';
 import { JwtModule } from '@nestjs/jwt';
+import { RefreshTokensProvider } from './providers/refresh-tokens.provider';
 
 @Module({
   controllers: [AuthController],
@@ -22,6 +23,7 @@ import { JwtModule } from '@nestjs/jwt';
     },
     SignInProvider,
     GenerateTokensProvider,
+    RefreshTokensProvider,
   ],
   // AuthModuleとUsersModuleどちらも循環依存があると、importでエラーになる
   // この依存は後で解決されるから、一旦forwardRefで仮に保持しておいて
