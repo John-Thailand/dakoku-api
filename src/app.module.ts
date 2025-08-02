@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import databaseConfig from './config/database.config';
+import environmentValidation from './config/environment.validation';
 
 // 環境変数名（NODE_ENV）を取得
 const ENV = process.env.NODE_ENV;
@@ -17,6 +18,7 @@ const ENV = process.env.NODE_ENV;
       envFilePath: !ENV ? '.env' : `.env.${ENV}`,
       // カスタム設定ファイルを読み込む
       load: [databaseConfig],
+      validationSchema: environmentValidation,
     }),
     // TypeORMを使ってMySQLに接続するための初期設定
     TypeOrmModule.forRootAsync({
