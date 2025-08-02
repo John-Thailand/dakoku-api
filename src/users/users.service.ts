@@ -173,4 +173,21 @@ export class UsersService {
       );
     }
   }
+
+  public async findOneByEmail(email: string) {
+    let user: User | undefined = undefined;
+
+    try {
+      user = await this.usersRepository.findOneBy({
+        email: email,
+        deleted_at: IsNull(),
+      });
+    } catch (error) {
+      throw new RequestTimeoutException(error, {
+        description: 'Could not fetch the user',
+      });
+    }
+
+    return user;
+  }
 }
