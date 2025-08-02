@@ -25,7 +25,10 @@ export class UsersService {
     // メールアドレスでユーザーを検索する
     try {
       existingUser = await this.usersRepository.findOne({
-        where: { email: createUserDto.email },
+        where: {
+          email: createUserDto.email,
+          deleted_at: IsNull(),
+        },
       });
     } catch (error) {
       throw new RequestTimeoutException(
@@ -86,13 +89,37 @@ export class UsersService {
       throw new BadRequestException('user not found');
     }
 
+    // 指定されたメールでユーザーを検索する
+    let existingEmailUser = undefined;
+    if (patchUserDto.email) {
+      try {
+        existingEmailUser = await this.usersRepository.findOneBy({
+          email: patchUserDto.email,
+          deleted_at: IsNull(),
+        });
+      } catch (error) {
+        throw new RequestTimeoutException(
+          'Unable to process your request at the moment please try later',
+          {
+            description: 'Error connecting to the database',
+          },
+        );
+      }
+    }
+
+    // すでに使用されているメールであれば、エラーを返す
+    if (existingEmailUser) {
+      throw new BadRequestException('the email is already used');
+    }
+
     // ユーザーを更新する
     existingUser.name = patchUserDto.name ?? existingUser.name;
     existingUser.email = patchUserDto.email ?? existingUser.email;
-    existingUser.password =
-      patchUserDto.password === null
-        ? existingUser.password
-        : await this.hashingProvider.hashPassword(patchUserDto.password);
+    if (patchUserDto.password) {
+      existingUser.password = await this.hashingProvider.hashPassword(
+        patchUserDto.password,
+      );
+    }
 
     try {
       await this.usersRepository.save(existingUser);
