@@ -4,10 +4,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/user.entity';
 import { AuthModule } from './auth/auth.module';
 
+const ENV = process.env.NODE_ENV;
+
 @Module({
-  // TypeORMを使ってMySQLに接続するための初期設定
-  // TODO: MYSQLとの繋ぎこみ
   imports: [
+    // TypeORMを使ってMySQLに接続するための初期設定
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: 'localhost',
