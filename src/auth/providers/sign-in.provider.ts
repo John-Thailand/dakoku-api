@@ -7,13 +7,14 @@ import {
   RequestTimeoutException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { GenerateTokensProvider } from './generate-tokens.provider';
 
 export class SignInProvider {
   constructor(
     @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
     private readonly hashingProvider: HashingProvider,
-    // private readonly generateTokensProvider: GenerateTokensProvider,
+    private readonly generateTokensProvider: GenerateTokensProvider,
   ) {}
 
   public async signIn(signInDto: SignInDto) {
@@ -45,6 +46,6 @@ export class SignInProvider {
     }
 
     // アクセストークンとリフレッシュトークンを返す
-    // return await this.
+    return await this.generateTokensProvider.generateTokens(user);
   }
 }
