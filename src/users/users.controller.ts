@@ -7,11 +7,13 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { PatchUserDto } from './dtos/patch-user.dto';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -19,6 +21,7 @@ export class UsersController {
 
   // TODO: 管理者のみユーザーを作成できる
   @Post()
+  @UseGuards(AuthGuard)
   // @Excludeを有効にして、is_administratorとpasswordをレスポンスから除外する
   @UseInterceptors(ClassSerializerInterceptor)
   public createUser(@Body() createUserDto: CreateUserDto) {
