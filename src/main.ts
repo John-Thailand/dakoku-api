@@ -11,7 +11,8 @@ async function bootstrap() {
       whitelist: true,
       // 余計なプロパティが含まれている場合、400 Bad Requestを返す
       forbidNonWhitelisted: true,
-      // transform: true,
+      // @Transformがうまく動作するために必要
+      transform: true,
     }),
   );
 
