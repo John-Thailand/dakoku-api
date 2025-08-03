@@ -248,7 +248,7 @@ export class UsersService {
 
     const allCount = await query.getCount();
 
-    query = query.limit(dto.page_size).offset(dto.page * dto.page_size);
+    query = query.limit(dto.page_size).offset((dto.page - 1) * dto.page_size);
 
     const users = await query.getMany();
 

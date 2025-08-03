@@ -41,7 +41,7 @@ export class SearchUsersRequestDto {
 
   @Type(() => Number)
   @IsInt()
-  @Min(0)
+  @Min(1)
   @IsOptional()
-  page: number = 0;
+  page: number = 1;
 }
