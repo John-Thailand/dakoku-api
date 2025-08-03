@@ -10,6 +10,8 @@ import { User } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HashingProvider } from 'src/auth/providers/hashing.provider';
 import { PatchUserDto } from './dtos/patch-user.dto';
+import { SearchUsersRequestDto } from './dtos/search-users-request.dto';
+import { SearchUsersResponseDto } from './dtos/search-users-response.dto';
 
 @Injectable()
 export class UsersService {
@@ -216,5 +218,43 @@ export class UsersService {
     }
 
     return user;
+  }
+
+  public async searchUsers(
+    dto: SearchUsersRequestDto,
+  ): Promise<SearchUsersResponseDto> {
+    let query = this.usersRepository
+      .createQueryBuilder()
+      .where('deleted_at IS NULL');
+
+    if (dto.name) {
+      query = query.andWhere('name LIKE :name', {
+        name: `%${dto.name}%`,
+      });
+    }
+
+    if (dto.email) {
+      query = query.andWhere('email LIKE :email', {
+        email: `%${dto.email}%`,
+      });
+    }
+
+    if (dto.include_administrators === false) {
+      query = query.andWhere('is_administrator = false');
+    }
+
+    const order = dto.order.toUpperCase() as 'ASC' | 'DESC';
+    query = query.orderBy(dto.order_by, order);
+
+    const allCount = await query.getCount();
+
+    query = query.limit(dto.page_size).offset(dto.page * dto.page_size);
+
+    const users = await query.getMany();
+
+    return {
+      users,
+      total: allCount,
+    };
   }
 }
