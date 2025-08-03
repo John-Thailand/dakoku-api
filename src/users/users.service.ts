@@ -19,7 +19,7 @@ export class UsersService {
     private readonly hashingProvider: HashingProvider,
   ) {}
 
-  public async createUser(createUserDto: CreateUserDto) {
+  public async createUser(createUserDto: CreateUserDto): Promise<User> {
     let existingUser = undefined;
 
     // メールアドレスでユーザーを検索する
@@ -66,7 +66,10 @@ export class UsersService {
     return newUser;
   }
 
-  public async patchUser(userId: string, patchUserDto: PatchUserDto) {
+  public async patchUser(
+    userId: string,
+    patchUserDto: PatchUserDto,
+  ): Promise<User> {
     let existingUser = undefined;
 
     // ユーザーIDで更新対象のユーザーを検索
@@ -135,7 +138,7 @@ export class UsersService {
     return existingUser;
   }
 
-  public async deleteUser(userId: string) {
+  public async deleteUser(userId: string): Promise<void> {
     let existingUser = undefined;
 
     // ユーザーIDで削除対象のユーザーを検索
@@ -174,7 +177,7 @@ export class UsersService {
     }
   }
 
-  public async findOneByEmail(email: string) {
+  public async findOneByEmail(email: string): Promise<User | undefined> {
     let user: User | undefined = undefined;
 
     try {
@@ -191,7 +194,7 @@ export class UsersService {
     return user;
   }
 
-  public async findOneById(id: string) {
+  public async findOneById(id: string): Promise<User> {
     let user = undefined;
 
     try {

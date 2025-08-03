@@ -1,4 +1,3 @@
-import { Exclude } from 'class-transformer';
 import {
   Column,
   CreateDateColumn,
@@ -34,7 +33,6 @@ export class User {
     length: 96,
     nullable: false,
   })
-  @Exclude()
   password: string;
 
   @Column({
@@ -42,7 +40,6 @@ export class User {
     nullable: false,
     default: false,
   })
-  @Exclude()
   is_administrator: boolean;
 
   @CreateDateColumn()
