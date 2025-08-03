@@ -11,6 +11,7 @@ import jwtConfig from '../config/jwt.config';
 // ExpressのHTTPリクエストオブジェクトを使うため
 // NestJSはデフォルトでHTTP通信の基盤としてExpressを使用しています
 import { Request } from 'express';
+import { REQUEST_USER_KEY } from '../constants/constants';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -37,6 +38,7 @@ export class AuthGuard implements CanActivate {
         audience: this.jwtConfiguration.audience,
         issuer: this.jwtConfiguration.issuer,
       });
+      request[REQUEST_USER_KEY] = payload;
       console.log(payload);
     } catch (error) {
       throw new UnauthorizedException();
