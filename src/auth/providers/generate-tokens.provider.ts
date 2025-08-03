@@ -39,6 +39,7 @@ export class GenerateTokensProvider {
         this.jwtConfiguration.accessTokenTtl,
         {
           email: user.email,
+          is_administrator: user.is_administrator,
         },
       ),
       // リフレッシュトークンの生成
