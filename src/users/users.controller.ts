@@ -44,4 +44,6 @@ export class UsersController {
   public deleteUser(@Param('id') id: string) {
     return this.usersService.deleteUser(id);
   }
+
+  // ユーザー一覧取得API
 }
