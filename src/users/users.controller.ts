@@ -60,4 +60,8 @@ export class UsersController {
   ): Promise<SearchUsersResponseDto> {
     return this.usersService.searchUsers(query);
   }
+
+  // TODO: 自身のユーザー情報を取得するAPI
+  // TODO: 自身のメールアドレスを変更するAPI
+  // TODO: 自身のパスワードを変更するAPI
 }
