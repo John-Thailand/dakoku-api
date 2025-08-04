@@ -13,6 +13,7 @@ import { PatchUserDto } from './dtos/patch-user.dto';
 import { SearchUsersRequestDto } from './dtos/search-users-request.dto';
 import { SearchUsersResponseDto } from './dtos/search-users-response.dto';
 import { MailService } from 'src/mail/providers/mail.service';
+import { GenerateTokensProvider } from 'src/auth/providers/generate-tokens.provider';
 
 @Injectable()
 export class UsersService {
@@ -21,6 +22,7 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
     private readonly hashingProvider: HashingProvider,
     private readonly mailService: MailService,
+    private readonly generateTokensProvider: GenerateTokensProvider,
   ) {}
 
   public async createUser(createUserDto: CreateUserDto): Promise<User> {
@@ -69,7 +71,9 @@ export class UsersService {
 
     // Welcomeメールを送信
     try {
-      await this.mailService.sendUserWelcome(newUser);
+      const token =
+        await this.generateTokensProvider.generateEmailVerifiedToken(newUser);
+      await this.mailService.sendUserWelcome(newUser, token);
     } catch (error) {
       throw new RequestTimeoutException(error);
     }
@@ -265,5 +269,14 @@ export class UsersService {
       users,
       total: allCount,
     };
+  }
+
+  public async updateEmailVerified(user: User) {
+    user.is_email_verified = true;
+    try {
+      await this.usersRepository.save(user);
+    } catch (error) {
+      throw new RequestTimeoutException(error);
+    }
   }
 }
