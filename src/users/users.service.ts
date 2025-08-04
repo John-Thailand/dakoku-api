@@ -12,6 +12,7 @@ import { HashingProvider } from 'src/auth/providers/hashing.provider';
 import { PatchUserDto } from './dtos/patch-user.dto';
 import { SearchUsersRequestDto } from './dtos/search-users-request.dto';
 import { SearchUsersResponseDto } from './dtos/search-users-response.dto';
+import { MailService } from 'src/mail/providers/mail.service';
 
 @Injectable()
 export class UsersService {
@@ -19,6 +20,7 @@ export class UsersService {
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
     private readonly hashingProvider: HashingProvider,
+    private readonly mailService: MailService,
   ) {}
 
   public async createUser(createUserDto: CreateUserDto): Promise<User> {
@@ -63,6 +65,13 @@ export class UsersService {
           description: 'Error connecting to the database',
         },
       );
+    }
+
+    // Welcomeメールを送信
+    try {
+      await this.mailService.sendUserWelcome(newUser);
+    } catch (error) {
+      throw new RequestTimeoutException(error);
     }
 
     return newUser;

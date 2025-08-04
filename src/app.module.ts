@@ -3,8 +3,10 @@ import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MailModule } from './mail/mail.module';
 import databaseConfig from './config/database.config';
 import environmentValidation from './config/environment.validation';
+import mailConfig from './config/mail.config';
 
 // 環境変数名（NODE_ENV）を取得
 const ENV = process.env.NODE_ENV;
@@ -17,7 +19,7 @@ const ENV = process.env.NODE_ENV;
       isGlobal: true,
       envFilePath: !ENV ? '.env' : `.env.${ENV}`,
       // カスタム設定ファイルを読み込む
-      load: [databaseConfig],
+      load: [databaseConfig, mailConfig],
       validationSchema: environmentValidation,
     }),
     // TypeORMを使ってMySQLに接続するための初期設定
@@ -39,6 +41,7 @@ const ENV = process.env.NODE_ENV;
     }),
     UsersModule,
     AuthModule,
+    MailModule,
   ],
   controllers: [],
   providers: [],
