@@ -6,7 +6,7 @@ import { User } from 'src/users/user.entity';
 export class MailService {
   constructor(private mailerService: MailerService) {}
 
-  public async sendUserWelcome(user: User): Promise<void> {
+  public async sendUserWelcome(user: User, token: string): Promise<void> {
     await this.mailerService.sendMail({
       to: user.email,
       from: `StarryBase LLC <no-reply@starrybase.com>`,
@@ -14,7 +14,7 @@ export class MailService {
       template: './welcome',
       context: {
         email: user.email,
-        emailVerifiedUrl: 'http://localhost:3000/auth/verified-email',
+        emailVerifiedUrl: `http://localhost:3000/auth/verify-email?token=${token}`,
       },
     });
   }

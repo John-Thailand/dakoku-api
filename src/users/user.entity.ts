@@ -42,6 +42,13 @@ export class User {
   })
   is_administrator: boolean;
 
+  @Column({
+    type: 'boolean',
+    nullable: false,
+    default: false,
+  })
+  is_email_verified: boolean;
+
   @CreateDateColumn()
   created_at: Date;
 
