@@ -3,6 +3,8 @@ import { SignInDto } from '../dtos/signin.dto';
 import { HashingProvider } from './hashing.provider';
 import {
   forwardRef,
+  HttpException,
+  HttpStatus,
   Inject,
   RequestTimeoutException,
   UnauthorizedException,
@@ -43,6 +45,16 @@ export class SignInProvider {
     // もしパスワードが正しくなければエラーを返す
     if (!isEqual) {
       throw new UnauthorizedException('incorrect password or email');
+    }
+
+    // メール認証していない場合はエラーを返す
+    // メール認証済みであることを事前条件（Precondition）にしている
+    // それが満たされない場合、412 Precondition Failedエラーを返す
+    if (!user.is_email_verified) {
+      throw new HttpException(
+        'email not verified',
+        HttpStatus.PRECONDITION_FAILED,
+      );
     }
 
     // アクセストークンとリフレッシュトークンを返す
