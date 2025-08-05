@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
@@ -19,6 +20,7 @@ import { Serialize } from 'src/interceptors/serialize.interceptor';
 import { UserDto } from './dtos/user.dto';
 import { SearchUsersRequestDto } from './dtos/search-users-request.dto';
 import { SearchUsersResponseDto } from './dtos/search-users-response.dto';
+import { REQUEST_USER_KEY } from 'src/auth/constants/constants';
 
 @Controller('users')
 export class UsersController {
@@ -61,7 +63,15 @@ export class UsersController {
     return this.usersService.searchUsers(query);
   }
 
-  // TODO: 自身のユーザー情報を取得するAPI
+  @Get('/me')
+  @UseGuards(AuthGuard)
+  @Serialize(UserDto)
+  public getMe(@Req() request) {
+    // TODO: デコレータを作成しても良いかも
+    const requestUser = request[REQUEST_USER_KEY];
+    return this.usersService.findOneById(requestUser.sub);
+  }
+
   // TODO: 自身のメールアドレスを変更するAPI
   // TODO: 自身のパスワードを変更するAPI
 }
