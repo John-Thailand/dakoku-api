@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   Query,
   Req,
   UseGuards,
@@ -21,6 +22,7 @@ import { UserDto } from './dtos/user.dto';
 import { SearchUsersRequestDto } from './dtos/search-users-request.dto';
 import { SearchUsersResponseDto } from './dtos/search-users-response.dto';
 import { REQUEST_USER_KEY } from 'src/auth/constants/constants';
+import { UpdatePasswordDto } from './dtos/update-password.dto';
 
 @Controller('users')
 export class UsersController {
@@ -73,5 +75,15 @@ export class UsersController {
   }
 
   // TODO: 自身のメールアドレスを変更するAPI
-  // TODO: 自身のパスワードを変更するAPI
+  @Put('/me/password')
+  @UseGuards(AuthGuard)
+  @Serialize(UserDto)
+  public updatePassword(
+    @Req() request,
+    @Body() updatePasswordDto: UpdatePasswordDto,
+  ) {
+    // TODO: デコレータを作成しても良いかも
+    const requestUser = request[REQUEST_USER_KEY];
+    return this.usersService.updatePassword(requestUser.sub, updatePasswordDto);
+  }
 }

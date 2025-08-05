@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  HttpStatus,
   Injectable,
   NotFoundException,
   RequestTimeoutException,
@@ -14,6 +15,7 @@ import { SearchUsersRequestDto } from './dtos/search-users-request.dto';
 import { SearchUsersResponseDto } from './dtos/search-users-response.dto';
 import { MailService } from 'src/mail/providers/mail.service';
 import { GenerateTokensProvider } from 'src/auth/providers/generate-tokens.provider';
+import { UpdatePasswordDto } from './dtos/update-password.dto';
 
 @Injectable()
 export class UsersService {
@@ -278,5 +280,72 @@ export class UsersService {
     } catch (error) {
       throw new RequestTimeoutException(error);
     }
+  }
+
+  public async updatePassword(
+    id: string,
+    updatePasswordDto: UpdatePasswordDto,
+  ): Promise<User> {
+    const existingUser = await this.findOneById(id);
+
+    // 入力されたパスワードとハッシュ化したユーザーを検証する
+    let isEqual: boolean = false;
+
+    try {
+      isEqual = await this.hashingProvider.comparePassword(
+        updatePasswordDto.current_password,
+        existingUser.password,
+      );
+    } catch (error) {
+      throw new RequestTimeoutException(error, {
+        description: 'could not compare password',
+      });
+    }
+
+    // もしパスワードが正しくなければエラーを返す
+    if (!isEqual) {
+      throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        field: 'current_password',
+        message: 'incorrect current password',
+      });
+    }
+
+    // 新しいパスワードと新しい確認用のパスワードが一致していない場合、エラーを返す
+    if (
+      updatePasswordDto.new_password !==
+      updatePasswordDto.new_password_confirmation
+    ) {
+      throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        field: 'new_password_confirmation',
+        message: 'new password and new confirmation password do not match',
+      });
+    }
+
+    // 現在のパスワードと新しいパスワードが同じ場合、エラーを返す
+    if (updatePasswordDto.current_password === updatePasswordDto.new_password) {
+      throw new BadRequestException(
+        'new password must be different from current password',
+      );
+    }
+
+    // パスワードを更新
+    existingUser.password = await this.hashingProvider.hashPassword(
+      updatePasswordDto.new_password,
+    );
+
+    try {
+      await this.usersRepository.save(existingUser);
+    } catch (error) {
+      throw new RequestTimeoutException(
+        'Unable to process your request at the moment please try later',
+        {
+          description: 'Error connecting to the database',
+        },
+      );
+    }
+
+    return existingUser;
   }
 }
