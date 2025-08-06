@@ -10,6 +10,7 @@ import {
   Put,
   Query,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
@@ -24,6 +25,8 @@ import { SearchUsersResponseDto } from './dtos/search-users-response.dto';
 import { REQUEST_USER_KEY } from 'src/auth/constants/constants';
 import { UpdatePasswordDto } from './dtos/update-password.dto';
 import { UpdateEmailDto } from './dtos/update-email.dto';
+import { UserUtil } from 'src/utils/user.util';
+import { Response } from 'express';
 
 @Controller('users')
 export class UsersController {
@@ -94,5 +97,29 @@ export class UsersController {
     // TODO: デコレータを作成しても良いかも
     const requestUser = request[REQUEST_USER_KEY];
     return this.usersService.updateEmail(requestUser.sub, updateEmailDto);
+  }
+
+  // csvはフォマットであって何をするかではない。エクスポートする機能なら'export'とした方が良い
+  // ?format=csvや?format=pdfなどフォーマットの拡張性がある
+  @Get('export')
+  @UseGuards(AuthGuard, AdminGuard)
+  public async exportUsersAsCsv(
+    @Query() query: SearchUsersRequestDto,
+    @Res() response: Response,
+  ) {
+    // ユーザー検索を行い、その情報をCSV形式のString型の値に変換
+    const result = await this.usersService.searchUsers(query);
+    const csvData = UserUtil.createCsvFromUsers(result.users);
+
+    // レスポンスヘッダーを設定
+    response.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    response.setHeader(
+      'Content-Disposition', // レスポンスの中身をブラウザがどう処理すべきか指示する
+      'attachment; filename="users.csv"', // attachmentはクライアント（ブラウザ）にファイルとしてダウンロードさせる
+    );
+
+    // CSVデータを送信
+    // UTF-8 BOM（Byte Order Mark）を先頭に追加することで、Excelでの文字化けを防止
+    response.send('\uFEFF' + csvData);
   }
 }
