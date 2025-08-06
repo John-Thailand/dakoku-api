@@ -350,11 +350,11 @@ export class UsersService {
     return existingUser;
   }
 
-  public async updateEmail(id: string, updateEmailDto: UpdateEmailDto) {
-    const existingUser = await this.findOneById(id);
+  public async updateEmail(userId: string, updateEmailDto: UpdateEmailDto) {
+    const requestUser = await this.findOneById(userId);
 
     // 入力された現在のパスワードが正しいかチェックする
-    if (existingUser.email !== updateEmailDto.current_email) {
+    if (requestUser.email !== updateEmailDto.current_email) {
       throw new BadRequestException({
         field: 'current_email',
         message: 'current email is incorrect',
@@ -371,12 +371,23 @@ export class UsersService {
       });
     }
 
+    // 新しいメールアドレスをすでに他のユーザーに使用されている場合、エラーを返す
+    const existingUser = await this.findOneByEmail(updateEmailDto.new_email);
+
+    if (existingUser && existingUser.id !== userId) {
+      throw new BadRequestException({
+        field: 'new_email',
+        message: 'this email is already in use',
+        statusCode: HttpStatus.BAD_REQUEST,
+      });
+    }
+
     // ユーザーのメールアドレスを新しいメールアドレスに更新
-    existingUser.email = updateEmailDto.new_email;
-    existingUser.is_email_verified = false;
+    requestUser.email = updateEmailDto.new_email;
+    requestUser.is_email_verified = false;
 
     try {
-      await this.usersRepository.save(existingUser);
+      await this.usersRepository.save(requestUser);
     } catch (error) {
       throw new RequestTimeoutException(
         'Unable to process your request at the moment please try later',
@@ -390,13 +401,13 @@ export class UsersService {
     try {
       const token =
         await this.generateTokensProvider.generateEmailVerifiedToken(
-          existingUser,
+          requestUser,
         );
-      await this.mailService.sendEmailChange(existingUser, token);
+      await this.mailService.sendEmailChange(requestUser, token);
     } catch (error) {
       throw new RequestTimeoutException(error);
     }
 
-    return existingUser;
+    return requestUser;
   }
 }

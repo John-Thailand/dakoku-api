@@ -1,0 +1,22 @@
+<p style="font-family: Arial, sans-serif; font-size: 16px; color: #333333">
+  We've updated email address on your account. 
+  Here are your account details:
+</p>
+<ul
+  style="
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    color: #333333;
+    padding-left: 20px;
+  "
+>
+  <li style="color: #555555">New Email: <%= email %></li>
+  <li style="color: #555555">
+    Email Verification: Please click the following link to verify your email address:<br />
+    <a href="<%= emailVerifiedUrl %>" style="color: #1a73e8;"><%= emailVerifiedUrl %></a>
+  </li>
+</ul>
+
+<p style="font-family: Arial, sans-serif; font-size: 16px; color: #333333">
+  Thanks!<br />StarryBase LLC Support
+</p>

@@ -23,7 +23,7 @@ export class MailService {
     await this.mailerService.sendMail({
       to: user.email,
       from: `StarryBase LLC <no-reply@starrybase.com>`,
-      subject: 'Update your email',
+      subject: `We've updated email address on your account`,
       template: './update-email',
       context: {
         email: user.email,

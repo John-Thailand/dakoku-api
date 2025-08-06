@@ -91,6 +91,7 @@ export class UsersController {
   @UseGuards(AuthGuard)
   @Serialize(UserDto)
   public updateEmail(@Req() request, @Body() updateEmailDto: UpdateEmailDto) {
+    // TODO: デコレータを作成しても良いかも
     const requestUser = request[REQUEST_USER_KEY];
     return this.usersService.updateEmail(requestUser.sub, updateEmailDto);
   }
