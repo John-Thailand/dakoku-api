@@ -23,6 +23,7 @@ import { SearchUsersRequestDto } from './dtos/search-users-request.dto';
 import { SearchUsersResponseDto } from './dtos/search-users-response.dto';
 import { REQUEST_USER_KEY } from 'src/auth/constants/constants';
 import { UpdatePasswordDto } from './dtos/update-password.dto';
+import { UpdateEmailDto } from './dtos/update-email.dto';
 
 @Controller('users')
 export class UsersController {
@@ -74,7 +75,6 @@ export class UsersController {
     return this.usersService.findOneById(requestUser.sub);
   }
 
-  // TODO: 自身のメールアドレスを変更するAPI
   @Put('/me/password')
   @UseGuards(AuthGuard)
   @Serialize(UserDto)
@@ -85,5 +85,13 @@ export class UsersController {
     // TODO: デコレータを作成しても良いかも
     const requestUser = request[REQUEST_USER_KEY];
     return this.usersService.updatePassword(requestUser.sub, updatePasswordDto);
+  }
+
+  @Put('/me/email')
+  @UseGuards(AuthGuard)
+  @Serialize(UserDto)
+  public updateEmail(@Req() request, @Body() updateEmailDto: UpdateEmailDto) {
+    const requestUser = request[REQUEST_USER_KEY];
+    return this.usersService.updateEmail(requestUser.sub, updateEmailDto);
   }
 }

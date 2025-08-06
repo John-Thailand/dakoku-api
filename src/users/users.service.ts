@@ -16,6 +16,7 @@ import { SearchUsersResponseDto } from './dtos/search-users-response.dto';
 import { MailService } from 'src/mail/providers/mail.service';
 import { GenerateTokensProvider } from 'src/auth/providers/generate-tokens.provider';
 import { UpdatePasswordDto } from './dtos/update-password.dto';
+import { UpdateEmailDto } from './dtos/update-email.dto';
 
 @Injectable()
 export class UsersService {
@@ -344,6 +345,56 @@ export class UsersService {
           description: 'Error connecting to the database',
         },
       );
+    }
+
+    return existingUser;
+  }
+
+  public async updateEmail(id: string, updateEmailDto: UpdateEmailDto) {
+    const existingUser = await this.findOneById(id);
+
+    // 入力された現在のパスワードが正しいかチェックする
+    if (existingUser.email !== updateEmailDto.current_email) {
+      throw new BadRequestException({
+        field: 'current_email',
+        message: 'current email is incorrect',
+        statusCode: HttpStatus.BAD_REQUEST,
+      });
+    }
+
+    // 同じメールへの変更は禁止とする
+    if (updateEmailDto.current_email === updateEmailDto.new_email) {
+      throw new BadRequestException({
+        field: 'new_email',
+        message: 'new email must be different from current email',
+        statusCode: HttpStatus.BAD_REQUEST,
+      });
+    }
+
+    // ユーザーのメールアドレスを新しいメールアドレスに更新
+    existingUser.email = updateEmailDto.new_email;
+    existingUser.is_email_verified = false;
+
+    try {
+      await this.usersRepository.save(existingUser);
+    } catch (error) {
+      throw new RequestTimeoutException(
+        'Unable to process your request at the moment please try later',
+        {
+          description: 'Error connecting to the database',
+        },
+      );
+    }
+
+    // メールアドレス認証を依頼するメールを送信
+    try {
+      const token =
+        await this.generateTokensProvider.generateEmailVerifiedToken(
+          existingUser,
+        );
+      await this.mailService.sendEmailChange(existingUser, token);
+    } catch (error) {
+      throw new RequestTimeoutException(error);
     }
 
     return existingUser;

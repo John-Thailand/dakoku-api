@@ -18,4 +18,17 @@ export class MailService {
       },
     });
   }
+
+  public async sendEmailChange(user: User, token: string): Promise<void> {
+    await this.mailerService.sendMail({
+      to: user.email,
+      from: `StarryBase LLC <no-reply@starrybase.com>`,
+      subject: 'Update your email',
+      template: './update-email',
+      context: {
+        email: user.email,
+        emailVerifiedUrl: `http://localhost:3000/auth/verify-email?token=${token}`,
+      },
+    });
+  }
 }
