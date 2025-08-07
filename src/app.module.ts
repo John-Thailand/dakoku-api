@@ -5,7 +5,6 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MailModule } from './mail/mail.module';
 import { AttendanceTypesModule } from './attendance-types/attendance-types.module';
-import { AttendanceTypesController } from './attendance-types/attendance-types.controller';
 import databaseConfig from './config/database.config';
 import environmentValidation from './config/environment.validation';
 import mailConfig from './config/mail.config';
@@ -46,7 +45,7 @@ const ENV = process.env.NODE_ENV;
     MailModule,
     AttendanceTypesModule,
   ],
-  controllers: [AttendanceTypesController],
+  controllers: [],
   providers: [],
 })
 export class AppModule {}

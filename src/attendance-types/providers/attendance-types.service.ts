@@ -2,6 +2,7 @@ import {
   BadRequestException,
   HttpStatus,
   Injectable,
+  NotFoundException,
   RequestTimeoutException,
 } from '@nestjs/common';
 import { CreateAttendanceTypeDto } from '../dtos/create-attendance-type.dto';
@@ -16,9 +17,11 @@ export class AttendanceTypesService {
     private readonly attendanceTypesRepository: Repository<AttendanceType>,
   ) {}
 
-  public async create(dto: CreateAttendanceTypeDto) {
-    const existingAttendanceType = await this.fingOneByName(dto.name);
+  public async create(dto: CreateAttendanceTypeDto): Promise<AttendanceType> {
+    // すでに同じ名前の勤怠タイプがないか確認
+    const existingAttendanceType = await this.findOneByName(dto.name);
 
+    // もし同じ名前の勤怠タイプが存在する場合、エラーを返す
     if (existingAttendanceType) {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
@@ -27,10 +30,11 @@ export class AttendanceTypesService {
       });
     }
 
+    // 新しい勤怠タイプを作成
     const newAttendanceType = this.attendanceTypesRepository.create(dto);
 
     try {
-      await this.attendanceTypesRepository.save(newAttendanceType);
+      return await this.attendanceTypesRepository.save(newAttendanceType);
     } catch (error) {
       throw new RequestTimeoutException(
         'Unable to process your request at the moment please try later',
@@ -41,10 +45,50 @@ export class AttendanceTypesService {
     }
   }
 
-  public async fingOneByName(name: string) {
+  public async delete(id: string): Promise<void> {
+    // 削除対象の勤怠タイプが存在するか確認
+    const existingAttendanceType = await this.findOneById(id);
+
+    // もし勤怠タイプが存在しない場合、エラーを返す
+    if (!existingAttendanceType) {
+      throw new NotFoundException('this attendance type does not exist');
+    }
+
+    // 勤怠タイプを論理削除する
+    existingAttendanceType.deleted_at = new Date();
+    try {
+      await this.attendanceTypesRepository.save(existingAttendanceType);
+    } catch (error) {
+      throw new RequestTimeoutException(
+        'Unable to process your request at the moment please try later',
+        {
+          description: 'Error connecting to the database',
+        },
+      );
+    }
+  }
+
+  public async findOneByName(name: string) {
     try {
       const attendanceType = await this.attendanceTypesRepository.findOneBy({
         name,
+        deleted_at: IsNull(),
+      });
+      return attendanceType;
+    } catch (error) {
+      throw new RequestTimeoutException(
+        'Unable to process your request at the moment please try later',
+        {
+          description: 'Error connecting to the database',
+        },
+      );
+    }
+  }
+
+  public async findOneById(id: string) {
+    try {
+      const attendanceType = await this.attendanceTypesRepository.findOneBy({
+        id,
         deleted_at: IsNull(),
       });
       return attendanceType;
