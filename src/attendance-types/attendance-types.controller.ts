@@ -5,6 +5,7 @@ import {
   HttpCode,
   Param,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import { CreateAttendanceTypeDto } from './dtos/create-attendance-type.dto';
@@ -12,6 +13,7 @@ import { AttendanceTypesService } from './providers/attendance-types.service';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { AttendanceType } from './attendance-type.entity';
+import { UpdateAttendanceTypeDto } from './dtos/update-attendance-type.dto';
 
 @Controller('attendance-types')
 export class AttendanceTypesController {
@@ -27,7 +29,14 @@ export class AttendanceTypesController {
     return this.attendanceTypesService.create(body);
   }
 
-  // TODO: 勤怠タイプのUpdate
+  @Put(':id')
+  @UseGuards(AuthGuard, AdminGuard)
+  public updateAttendanceType(
+    @Param('id') id: string,
+    @Body() body: UpdateAttendanceTypeDto,
+  ): Promise<AttendanceType> {
+    return this.attendanceTypesService.update(id, body);
+  }
 
   @Delete(':id')
   @UseGuards(AuthGuard, AdminGuard)
