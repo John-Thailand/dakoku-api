@@ -110,6 +110,22 @@ export class AttendanceTypesService {
     }
   }
 
+  public async findAll(): Promise<AttendanceType[]> {
+    try {
+      const attendanceTypes = await this.attendanceTypesRepository.findBy({
+        deleted_at: IsNull(),
+      });
+      return attendanceTypes;
+    } catch (error) {
+      throw new RequestTimeoutException(
+        'Unable to process your request at the moment please try later',
+        {
+          description: 'Error connecting to the database',
+        },
+      );
+    }
+  }
+
   public async findOneByName(name: string) {
     try {
       const attendanceType = await this.attendanceTypesRepository.findOneBy({

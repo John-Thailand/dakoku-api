@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
   Param,
   Post,
@@ -45,5 +46,9 @@ export class AttendanceTypesController {
     return this.attendanceTypesService.delete(id);
   }
 
-  // TODO: 勤怠タイプの全件Get
+  @Get()
+  @UseGuards(AuthGuard)
+  public getAttendanceTypes(): Promise<AttendanceType[]> {
+    return this.attendanceTypesService.findAll();
+  }
 }
