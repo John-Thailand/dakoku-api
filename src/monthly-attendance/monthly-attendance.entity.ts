@@ -16,6 +16,7 @@ import { User } from 'src/users/user.entity';
 // 複合一意制約をエンティティクラスに設定する場合に使う
 // ユーザーと年月で一意制約を設定
 @Unique('unique_user_month', ['user', 'target_month'])
+// TODO: インデックスの設定：@Index('idx_user_month', ['target_month'])
 export class MonthlyAttendance {
   @PrimaryGeneratedColumn('uuid')
   id: string;
