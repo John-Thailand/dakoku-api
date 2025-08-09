@@ -6,22 +6,19 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 import { MonthlyAttendanceStatus } from './enums/monthly-attendance-status.enum';
 import { User } from 'src/users/user.entity';
 
 @Entity('monthly_attendance')
+// 複合一意制約をエンティティクラスに設定する場合に使う
+// ユーザーと年月で一意制約を設定
+@Unique('unique_user_month', ['user', 'target_month'])
 export class MonthlyAttendance {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-
-  // @Column({
-  //   type: 'char',
-  //   length: 36,
-  //   nullable: false,
-  // })
-  // user_id: string;
 
   @ManyToOne(() => User, (user) => user.monthly_attendance)
   // JoinColumnを設定していないと、カラム名がuserIdになってしまう
