@@ -3,22 +3,25 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { MonthlyAttendanceStatus } from './enums/monthly-attendance-status.enum';
+import { User } from 'src/users/user.entity';
 
 @Entity('monthly_attendance')
 export class MonthlyAttendance {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({
-    type: 'char',
-    length: 36,
-    nullable: false,
-  })
-  user_id: string;
+  // @Column({
+  //   type: 'char',
+  //   length: 36,
+  //   nullable: false,
+  // })
+  // user_id: string;
 
   @Column({
     type: 'date',
@@ -43,5 +46,7 @@ export class MonthlyAttendance {
   @DeleteDateColumn()
   deleted_at: Date;
 
-  // TODO: Userエンティティとのリレーションを設定
+  @ManyToOne(() => User, (user) => user.monthly_attendance)
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 }

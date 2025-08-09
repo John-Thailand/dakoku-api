@@ -1,8 +1,10 @@
+import { MonthlyAttendance } from 'src/monthly-attendance/monthly-attendance.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -57,4 +59,10 @@ export class User {
 
   @DeleteDateColumn()
   deleted_at: Date;
+
+  @OneToMany(
+    () => MonthlyAttendance,
+    (monthlyAttendance) => monthlyAttendance.user,
+  )
+  monthly_attendance: MonthlyAttendance[];
 }
