@@ -62,7 +62,7 @@ export class User {
 
   @OneToMany(
     () => MonthlyAttendance,
-    (monthlyAttendance) => monthlyAttendance.user,
+    (monthly_attendance) => monthly_attendance.user,
   )
   monthly_attendance: MonthlyAttendance[];
 }
