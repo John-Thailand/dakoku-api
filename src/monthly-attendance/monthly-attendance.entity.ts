@@ -23,6 +23,11 @@ export class MonthlyAttendance {
   // })
   // user_id: string;
 
+  @ManyToOne(() => User, (user) => user.monthly_attendance)
+  // JoinColumnを設定していないと、カラム名がuserIdになってしまう
+  @JoinColumn({ name: 'user_id' })
+  user: User;
+
   @Column({
     type: 'date',
     nullable: false,
@@ -45,8 +50,4 @@ export class MonthlyAttendance {
 
   @DeleteDateColumn()
   deleted_at: Date;
-
-  @ManyToOne(() => User, (user) => user.monthly_attendance)
-  @JoinColumn({ name: 'user_id' })
-  user: User;
 }
