@@ -76,7 +76,6 @@ export class MonthlyAttendanceService {
       }
     }
 
-    // TODO: レスポンスを変えたい
     return newMonthlyAttendanceList;
   }
 }
