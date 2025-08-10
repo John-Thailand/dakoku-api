@@ -10,6 +10,7 @@ export class BatchProcessingController {
   ) {}
 
   @Post('monthly-attendance/current')
+  // TODO: AuthGuardやAdminGuardが必要かも
   @Serialize(MonthlyAttendanceDto)
   public createMonthlyAttendanceForThisMonth() {
     return this.monthlyAttendanceService.createMonthlyAttendanceForThisMonth();
