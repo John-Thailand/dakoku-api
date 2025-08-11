@@ -17,8 +17,9 @@ export class MonthlyAttendanceController {
     @Req() request,
     @Param() param: CloseMyMonthlyAttendanceDto,
   ): Promise<MonthlyAttendance> {
+    const requestUser = request[REQUEST_USER_KEY];
     return this.monthlyAttendanceService.closeMyMonthlyAttendance(
-      request.sub,
+      requestUser.sub,
       param,
     );
   }
