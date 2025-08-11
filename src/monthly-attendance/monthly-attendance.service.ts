@@ -1,13 +1,17 @@
 import {
   ConflictException,
   Injectable,
+  NotFoundException,
   RequestTimeoutException,
 } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, IsNull, Repository } from 'typeorm';
 import { MonthlyAttendance } from './monthly-attendance.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/user.entity';
 import { DateUtil } from 'src/utils/date.util';
+import { CloseMyMonthlyAttendanceDto } from 'src/users/dtos/close-my-monthly-attendance.dto';
+import { UsersService } from 'src/users/users.service';
+import { MonthlyAttendanceStatus } from './enums/monthly-attendance-status.enum';
 
 @Injectable()
 export class MonthlyAttendanceService {
@@ -16,6 +20,7 @@ export class MonthlyAttendanceService {
     private readonly monthlyAttendanceRepository: Repository<MonthlyAttendance>,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    private readonly usersService: UsersService,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -77,5 +82,63 @@ export class MonthlyAttendanceService {
     }
 
     return newMonthlyAttendanceList;
+  }
+
+  public async closeMyMonthlyAttendance(
+    userId: string,
+    dto: CloseMyMonthlyAttendanceDto,
+  ): Promise<MonthlyAttendance> {
+    // ユーザーが存在するか確認
+    const existingUser = await this.usersService.findOneById(userId);
+
+    // 該当ユーザーの該当年月の月次勤怠が存在するか確認
+    const targetMonth = DateUtil.convertTextToDate(dto.target_month);
+    const existingMonthlyAttendance = await this.findOneByUserIdAndTargetMonth(
+      existingUser.id,
+      targetMonth,
+    );
+
+    // ユーザーの月次勤怠締めを実行
+    existingMonthlyAttendance.status = MonthlyAttendanceStatus.USER_CLOSED;
+    try {
+      return await this.monthlyAttendanceRepository.save(
+        existingMonthlyAttendance,
+      );
+    } catch (error) {
+      throw new RequestTimeoutException(
+        'Unable to process your request at the moment please try later',
+        {
+          description: 'Error connecting to the database',
+        },
+      );
+    }
+  }
+
+  public async findOneByUserIdAndTargetMonth(
+    userId: string,
+    targetMonth: Date,
+  ): Promise<MonthlyAttendance> {
+    let monthlyAttendance: MonthlyAttendance | undefined = undefined;
+
+    try {
+      monthlyAttendance = await this.monthlyAttendanceRepository.findOneBy({
+        user_id: userId,
+        target_month: targetMonth,
+        deleted_at: IsNull(),
+      });
+    } catch (error) {
+      throw new RequestTimeoutException(
+        'Unable to process your request at the moment please try later',
+        {
+          description: 'Error connecting to the database',
+        },
+      );
+    }
+
+    if (!monthlyAttendance) {
+      throw new NotFoundException('this monthly attendance not found');
+    }
+
+    return monthlyAttendance;
   }
 }

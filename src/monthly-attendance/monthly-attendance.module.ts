@@ -8,11 +8,13 @@ import { AuthModule } from 'src/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import jwtConfig from 'src/auth/config/jwt.config';
 import { JwtModule } from '@nestjs/jwt';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([MonthlyAttendance, User]),
     AuthModule,
+    UsersModule,
     // jwtConfigをAuthModuleで使えるようにする
     ConfigModule.forFeature(jwtConfig),
     // ConfigServiceからjwtConfigを読み取る

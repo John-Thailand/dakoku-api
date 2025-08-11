@@ -1,18 +1,25 @@
 import { Controller, Put, Param, Req, UseGuards } from '@nestjs/common';
 import { REQUEST_USER_KEY } from 'src/auth/constants/constants';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { CloseMyMonthlyAttendanceDto } from 'src/users/dtos/close-my-monthly-attendance.dto';
+import { MonthlyAttendanceService } from './monthly-attendance.service';
+import { MonthlyAttendance } from './monthly-attendance.entity';
 
 @Controller()
 export class MonthlyAttendanceController {
-  @Put('users/me/monthly-attendance/:targetMonth')
+  constructor(
+    private readonly monthlyAttendanceService: MonthlyAttendanceService,
+  ) {}
+
+  @Put('users/me/monthly-attendance/:target_month')
   @UseGuards(AuthGuard)
   public closeMyMonthlyAttendance(
     @Req() request,
-    // TODO: バリデーション
-    @Param('targetMonth') targetMonth: string,
-  ) {
-    const requestUser = request[REQUEST_USER_KEY];
-    console.log(requestUser.sub);
-    console.log(targetMonth);
+    @Param() param: CloseMyMonthlyAttendanceDto,
+  ): Promise<MonthlyAttendance> {
+    return this.monthlyAttendanceService.closeMyMonthlyAttendance(
+      request.sub,
+      param,
+    );
   }
 }

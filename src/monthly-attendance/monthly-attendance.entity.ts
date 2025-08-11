@@ -21,6 +21,14 @@ export class MonthlyAttendance {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({
+    name: 'user_id',
+    type: 'char',
+    length: 36,
+    nullable: false,
+  })
+  user_id: string;
+
   @ManyToOne(() => User, (user) => user.monthly_attendance)
   // JoinColumnを設定していないと、カラム名がuserIdになってしまう
   @JoinColumn({ name: 'user_id' })
