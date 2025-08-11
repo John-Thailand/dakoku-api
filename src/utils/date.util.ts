@@ -1,4 +1,4 @@
-import { format, startOfMonth } from 'date-fns';
+import { format, parse, startOfMonth } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 
 const DEFAULT_TZ = 'Asia/Tokyo';
@@ -19,5 +19,10 @@ export class DateUtil {
     const zonedTime = toZonedTime(baseDate, timeZone);
     const monthStart = startOfMonth(zonedTime);
     return monthStart;
+  }
+
+  static convertTextToDate(text: string) {
+    const parsedDate = parse(text, 'yyyy-MM', new Date());
+    return parsedDate;
   }
 }
