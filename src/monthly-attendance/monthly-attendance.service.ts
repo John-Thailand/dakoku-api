@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -12,6 +13,8 @@ import { DateUtil } from 'src/utils/date.util';
 import { CloseMyMonthlyAttendanceParamDto } from 'src/monthly-attendance/dtos/close-my-monthly-attendance-param.dto';
 import { UsersService } from 'src/users/users.service';
 import { MonthlyAttendanceStatus } from './enums/monthly-attendance-status.enum';
+import { UpdateUserMonthlyAttendanceStatusParam } from './dtos/update-user-monthly-attendance-status-param.dto';
+import { UpdateUserMonthlyAttendanceStatus } from './dtos/update-user-monthly-attendance-status.dto';
 
 @Injectable()
 export class MonthlyAttendanceService {
@@ -100,6 +103,42 @@ export class MonthlyAttendanceService {
 
     // ユーザーの月次勤怠締めを実行
     existingMonthlyAttendance.status = MonthlyAttendanceStatus.USER_CLOSED;
+    try {
+      return await this.monthlyAttendanceRepository.save(
+        existingMonthlyAttendance,
+      );
+    } catch (error) {
+      throw new RequestTimeoutException(
+        'Unable to process your request at the moment please try later',
+        {
+          description: 'Error connecting to the database',
+        },
+      );
+    }
+  }
+
+  public async updateUserMonthlyAttendanceStatus(
+    param: UpdateUserMonthlyAttendanceStatusParam,
+    body: UpdateUserMonthlyAttendanceStatus,
+  ): Promise<MonthlyAttendance> {
+    // ユーザーが存在するか確認
+    const existingUser = await this.usersService.findOneById(param.user_id);
+
+    if (existingUser.is_administrator) {
+      throw new BadRequestException(
+        'Administrators do not have monthly attendance',
+      );
+    }
+
+    // 対象の月次勤怠が存在するか確認
+    const targetMonth = DateUtil.convertTextToDate(param.target_month);
+    const existingMonthlyAttendance = await this.findOneByUserIdAndTargetMonth(
+      existingUser.id,
+      targetMonth,
+    );
+
+    // 月次勤怠を更新
+    existingMonthlyAttendance.status = body.status;
     try {
       return await this.monthlyAttendanceRepository.save(
         existingMonthlyAttendance,

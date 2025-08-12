@@ -1,9 +1,12 @@
-import { Controller, Param, Req, UseGuards, Patch } from '@nestjs/common';
+import { Controller, Param, Req, UseGuards, Patch, Body } from '@nestjs/common';
 import { REQUEST_USER_KEY } from 'src/auth/constants/constants';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { CloseMyMonthlyAttendanceParamDto } from 'src/monthly-attendance/dtos/close-my-monthly-attendance-param.dto';
 import { MonthlyAttendanceService } from './monthly-attendance.service';
 import { MonthlyAttendance } from './monthly-attendance.entity';
+import { AdminGuard } from 'src/auth/guards/admin.guard';
+import { UpdateUserMonthlyAttendanceStatusParam } from './dtos/update-user-monthly-attendance-status-param.dto';
+import { UpdateUserMonthlyAttendanceStatus } from './dtos/update-user-monthly-attendance-status.dto';
 
 @Controller()
 export class MonthlyAttendanceController {
@@ -23,6 +26,18 @@ export class MonthlyAttendanceController {
     return this.monthlyAttendanceService.closeMyMonthlyAttendance(
       requestUser.sub,
       param,
+    );
+  }
+
+  @Patch('users/:user_id/monthly-attendance/:target_month/status')
+  @UseGuards(AuthGuard, AdminGuard)
+  public updateUserMonthlyAttendanceStatus(
+    @Param() param: UpdateUserMonthlyAttendanceStatusParam,
+    @Body() body: UpdateUserMonthlyAttendanceStatus,
+  ): Promise<MonthlyAttendance> {
+    return this.monthlyAttendanceService.updateUserMonthlyAttendanceStatus(
+      param,
+      body,
     );
   }
 }
