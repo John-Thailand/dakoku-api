@@ -9,7 +9,7 @@ import { MonthlyAttendance } from './monthly-attendance.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/user.entity';
 import { DateUtil } from 'src/utils/date.util';
-import { CloseMyMonthlyAttendanceDto } from 'src/users/dtos/close-my-monthly-attendance.dto';
+import { CloseMyMonthlyAttendanceParamDto } from 'src/monthly-attendance/dtos/close-my-monthly-attendance-param.dto';
 import { UsersService } from 'src/users/users.service';
 import { MonthlyAttendanceStatus } from './enums/monthly-attendance-status.enum';
 
@@ -86,7 +86,7 @@ export class MonthlyAttendanceService {
 
   public async closeMyMonthlyAttendance(
     userId: string,
-    dto: CloseMyMonthlyAttendanceDto,
+    dto: CloseMyMonthlyAttendanceParamDto,
   ): Promise<MonthlyAttendance> {
     // ユーザーが存在するか確認
     const existingUser = await this.usersService.findOneById(userId);
