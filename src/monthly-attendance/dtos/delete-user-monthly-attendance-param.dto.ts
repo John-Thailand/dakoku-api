@@ -1,0 +1,17 @@
+import { IsNotEmpty, IsString, IsUUID, Matches } from 'class-validator';
+import { IsMoreThanServiceStartedYear } from '../validators/is_more_than_service_started_year.validator';
+
+export class DeleteUserMonthlyAttendanceParam {
+  @IsString()
+  @IsNotEmpty()
+  @IsUUID()
+  user_id: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Matches(/^\d{4}-(0[1-9]|1[0-2])$/, {
+    message: 'target month format is yyyy-MM',
+  })
+  @IsMoreThanServiceStartedYear()
+  target_month: string;
+}

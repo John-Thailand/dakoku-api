@@ -15,6 +15,7 @@ import { UsersService } from 'src/users/users.service';
 import { MonthlyAttendanceStatus } from './enums/monthly-attendance-status.enum';
 import { UpdateUserMonthlyAttendanceStatusParam } from './dtos/update-user-monthly-attendance-status-param.dto';
 import { UpdateUserMonthlyAttendanceStatus } from './dtos/update-user-monthly-attendance-status.dto';
+import { DeleteUserMonthlyAttendanceParam } from './dtos/delete-user-monthly-attendance-param.dto';
 
 @Injectable()
 export class MonthlyAttendanceService {
@@ -85,6 +86,33 @@ export class MonthlyAttendanceService {
     }
 
     return newMonthlyAttendanceList;
+  }
+
+  public async deleteUserMonthlyAttendance(
+    param: DeleteUserMonthlyAttendanceParam,
+  ): Promise<void> {
+    // ユーザーが存在するか確認
+    const existingUser = await this.usersService.findOneById(param.user_id);
+
+    // 該当ユーザーの該当年月の月次勤怠が存在するか確認
+    const targetMonth = DateUtil.convertTextToDate(param.target_month);
+    const existingMonthlyAttendance = await this.findOneByUserIdAndTargetMonth(
+      existingUser.id,
+      targetMonth,
+    );
+
+    // 月次勤怠を削除
+    existingMonthlyAttendance.deleted_at = new Date();
+    try {
+      await this.monthlyAttendanceRepository.save(existingMonthlyAttendance);
+    } catch (error) {
+      throw new RequestTimeoutException(
+        'Unable to process your request at the moment please try later',
+        {
+          description: 'Error connecting to the database',
+        },
+      );
+    }
   }
 
   public async closeMyMonthlyAttendance(

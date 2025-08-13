@@ -1,4 +1,12 @@
-import { Controller, Param, Req, UseGuards, Patch, Body } from '@nestjs/common';
+import {
+  Controller,
+  Param,
+  Req,
+  UseGuards,
+  Patch,
+  Body,
+  Delete,
+} from '@nestjs/common';
 import { REQUEST_USER_KEY } from 'src/auth/constants/constants';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { CloseMyMonthlyAttendanceParamDto } from 'src/monthly-attendance/dtos/close-my-monthly-attendance-param.dto';
@@ -7,6 +15,7 @@ import { MonthlyAttendance } from './monthly-attendance.entity';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { UpdateUserMonthlyAttendanceStatusParam } from './dtos/update-user-monthly-attendance-status-param.dto';
 import { UpdateUserMonthlyAttendanceStatus } from './dtos/update-user-monthly-attendance-status.dto';
+import { DeleteUserMonthlyAttendanceParam } from './dtos/delete-user-monthly-attendance-param.dto';
 
 @Controller()
 export class MonthlyAttendanceController {
@@ -39,5 +48,13 @@ export class MonthlyAttendanceController {
       param,
       body,
     );
+  }
+
+  @Delete('users/:user_id/monthly-attendance/:target_month')
+  @UseGuards(AuthGuard, AdminGuard)
+  public deleteUserMonthAttendance(
+    @Param() param: DeleteUserMonthlyAttendanceParam,
+  ): Promise<void> {
+    return this.monthlyAttendanceService.deleteUserMonthlyAttendance(param);
   }
 }
