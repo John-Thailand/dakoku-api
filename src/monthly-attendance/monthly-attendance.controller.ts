@@ -6,6 +6,7 @@ import {
   Patch,
   Body,
   Delete,
+  Post,
 } from '@nestjs/common';
 import { REQUEST_USER_KEY } from 'src/auth/constants/constants';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
@@ -16,6 +17,8 @@ import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { UpdateUserMonthlyAttendanceStatusParam } from './dtos/update-user-monthly-attendance-status-param.dto';
 import { UpdateUserMonthlyAttendanceStatus } from './dtos/update-user-monthly-attendance-status.dto';
 import { DeleteUserMonthlyAttendanceParam } from './dtos/delete-user-monthly-attendance-param.dto';
+import { CreateUserMonthlyAttendanceParam } from './dtos/create-user-monthly-attendance-param.dto';
+import { CreateUserMonthlyAttendanceDto } from './dtos/create-user-monthly-attendance.dto';
 
 @Controller()
 export class MonthlyAttendanceController {
@@ -45,6 +48,18 @@ export class MonthlyAttendanceController {
     @Body() body: UpdateUserMonthlyAttendanceStatus,
   ): Promise<MonthlyAttendance> {
     return this.monthlyAttendanceService.updateUserMonthlyAttendanceStatus(
+      param,
+      body,
+    );
+  }
+
+  @Post('users/:user_id/monthly-attendance')
+  @UseGuards(AuthGuard, AdminGuard)
+  public createUserMonthlyAttendance(
+    @Param() param: CreateUserMonthlyAttendanceParam,
+    @Body() body: CreateUserMonthlyAttendanceDto,
+  ): Promise<MonthlyAttendance> {
+    return this.monthlyAttendanceService.createUserMonthlyAttendance(
       param,
       body,
     );

@@ -16,6 +16,8 @@ import { MonthlyAttendanceStatus } from './enums/monthly-attendance-status.enum'
 import { UpdateUserMonthlyAttendanceStatusParam } from './dtos/update-user-monthly-attendance-status-param.dto';
 import { UpdateUserMonthlyAttendanceStatus } from './dtos/update-user-monthly-attendance-status.dto';
 import { DeleteUserMonthlyAttendanceParam } from './dtos/delete-user-monthly-attendance-param.dto';
+import { CreateUserMonthlyAttendanceParam } from './dtos/create-user-monthly-attendance-param.dto';
+import { CreateUserMonthlyAttendanceDto } from './dtos/create-user-monthly-attendance.dto';
 
 @Injectable()
 export class MonthlyAttendanceService {
@@ -88,6 +90,41 @@ export class MonthlyAttendanceService {
     return newMonthlyAttendanceList;
   }
 
+  public async createUserMonthlyAttendance(
+    param: CreateUserMonthlyAttendanceParam,
+    body: CreateUserMonthlyAttendanceDto,
+  ): Promise<MonthlyAttendance> {
+    // ユーザーが存在するか確認
+    const existingUser = await this.usersService.findOneById(param.user_id);
+
+    // 該当ユーザーの該当年月の月次勤怠が存在するか確認
+    const targetMonth = DateUtil.convertTextToDate(body.target_month);
+    const existingMonthlyAttendance = await this.findOneByUserIdAndTargetMonth(
+      existingUser.id,
+      targetMonth,
+    );
+
+    if (existingMonthlyAttendance) {
+      throw new ConflictException('target monthly attendance exists');
+    }
+
+    // 月次勤怠を作成
+    const newMonthlyAttendance = this.monthlyAttendanceRepository.create({
+      user_id: param.user_id,
+      target_month: targetMonth,
+    });
+    try {
+      return await this.monthlyAttendanceRepository.save(newMonthlyAttendance);
+    } catch (error) {
+      throw new RequestTimeoutException(
+        'Unable to process your request at the moment please try later',
+        {
+          description: 'Error connecting to the database',
+        },
+      );
+    }
+  }
+
   public async deleteUserMonthlyAttendance(
     param: DeleteUserMonthlyAttendanceParam,
   ): Promise<void> {
@@ -100,6 +137,10 @@ export class MonthlyAttendanceService {
       existingUser.id,
       targetMonth,
     );
+
+    if (!existingMonthlyAttendance) {
+      throw new NotFoundException('this monthly attendance not found');
+    }
 
     // 月次勤怠を削除
     existingMonthlyAttendance.deleted_at = new Date();
@@ -128,6 +169,10 @@ export class MonthlyAttendanceService {
       existingUser.id,
       targetMonth,
     );
+
+    if (!existingMonthlyAttendance) {
+      throw new NotFoundException('this monthly attendance not found');
+    }
 
     // ユーザーの月次勤怠締めを実行
     existingMonthlyAttendance.status = MonthlyAttendanceStatus.USER_CLOSED;
@@ -165,6 +210,10 @@ export class MonthlyAttendanceService {
       targetMonth,
     );
 
+    if (!existingMonthlyAttendance) {
+      throw new NotFoundException('this monthly attendance not found');
+    }
+
     // 月次勤怠を更新
     existingMonthlyAttendance.status = body.status;
     try {
@@ -184,7 +233,7 @@ export class MonthlyAttendanceService {
   public async findOneByUserIdAndTargetMonth(
     userId: string,
     targetMonth: Date,
-  ): Promise<MonthlyAttendance> {
+  ): Promise<MonthlyAttendance | undefined> {
     let monthlyAttendance: MonthlyAttendance | undefined = undefined;
 
     try {
@@ -200,10 +249,6 @@ export class MonthlyAttendanceService {
           description: 'Error connecting to the database',
         },
       );
-    }
-
-    if (!monthlyAttendance) {
-      throw new NotFoundException('this monthly attendance not found');
     }
 
     return monthlyAttendance;
