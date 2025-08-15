@@ -18,6 +18,8 @@ import { UpdateUserMonthlyAttendanceStatus } from './dtos/update-user-monthly-at
 import { DeleteUserMonthlyAttendanceParam } from './dtos/delete-user-monthly-attendance-param.dto';
 import { CreateUserMonthlyAttendanceParam } from './dtos/create-user-monthly-attendance-param.dto';
 import { CreateUserMonthlyAttendanceDto } from './dtos/create-user-monthly-attendance.dto';
+import { GetMonthlyAttendanceRequestDto } from './dtos/get-monthly-attendance-request.dto';
+import { GetMonthlyAttendanceResponseDto } from './dtos/get-monthly-attendance-response.dto';
 
 @Injectable()
 export class MonthlyAttendanceService {
@@ -228,6 +230,49 @@ export class MonthlyAttendanceService {
         },
       );
     }
+  }
+
+  public async getMonthlyAttendance(
+    query: GetMonthlyAttendanceRequestDto,
+  ): Promise<GetMonthlyAttendanceResponseDto> {
+    let queryBuilder = this.monthlyAttendanceRepository
+      .createQueryBuilder('ma')
+      .where('ma.deleted_at IS NULL');
+
+    if (query.target_month) {
+      const targetMonth = DateUtil.convertTextToDate(query.target_month);
+      queryBuilder = queryBuilder.andWhere('ma.target_month = :targetMonth', {
+        targetMonth,
+      });
+    }
+
+    if (query.user_id) {
+      queryBuilder = queryBuilder.andWhere('ma.user_id = :userId', {
+        userId: query.user_id,
+      });
+    }
+
+    if (query.status) {
+      queryBuilder = queryBuilder.andWhere('ma.status = :status', {
+        status: query.status,
+      });
+    }
+
+    const order = query.order.toUpperCase() as 'ASC' | 'DESC';
+    queryBuilder = queryBuilder.orderBy(query.order_by, order);
+
+    const allCount = await queryBuilder.getCount();
+
+    queryBuilder = queryBuilder
+      .limit(query.page_size)
+      .offset((query.page - 1) * query.page_size);
+
+    const monthlyAttendance = await queryBuilder.getMany();
+
+    return {
+      monthly_attendance: monthlyAttendance,
+      total: allCount,
+    };
   }
 
   public async findOneByUserIdAndTargetMonth(
