@@ -23,6 +23,7 @@ import { CreateUserMonthlyAttendanceParam } from './dtos/create-user-monthly-att
 import { CreateUserMonthlyAttendanceDto } from './dtos/create-user-monthly-attendance.dto';
 import { GetMonthlyAttendanceRequestDto } from './dtos/get-monthly-attendance-request.dto';
 import { GetMonthlyAttendanceResponseDto } from './dtos/get-monthly-attendance-response.dto';
+import { GetMyMonthlyAttendanceRequestDto } from './dtos/get-my-monthly-attendance-request.dto';
 
 @Controller()
 export class MonthlyAttendanceController {
@@ -83,5 +84,18 @@ export class MonthlyAttendanceController {
     @Query() query: GetMonthlyAttendanceRequestDto,
   ): Promise<GetMonthlyAttendanceResponseDto> {
     return this.monthlyAttendanceService.getMonthlyAttendance(query);
+  }
+
+  @Get('users/me/monthly-attendance')
+  @UseGuards(AuthGuard)
+  public getMyMonthlyAttendance(
+    @Req() request,
+    @Query() query: GetMyMonthlyAttendanceRequestDto,
+  ): Promise<GetMonthlyAttendanceResponseDto> {
+    const requestUser = request[REQUEST_USER_KEY];
+    return this.monthlyAttendanceService.getMyMonthlyAttendance(
+      requestUser.sub,
+      query,
+    );
   }
 }

@@ -20,6 +20,7 @@ import { CreateUserMonthlyAttendanceParam } from './dtos/create-user-monthly-att
 import { CreateUserMonthlyAttendanceDto } from './dtos/create-user-monthly-attendance.dto';
 import { GetMonthlyAttendanceRequestDto } from './dtos/get-monthly-attendance-request.dto';
 import { GetMonthlyAttendanceResponseDto } from './dtos/get-monthly-attendance-response.dto';
+import { GetMyMonthlyAttendanceRequestDto } from './dtos/get-my-monthly-attendance-request.dto';
 
 @Injectable()
 export class MonthlyAttendanceService {
@@ -272,6 +273,44 @@ export class MonthlyAttendanceService {
     return {
       monthly_attendance: monthlyAttendance,
       total: allCount,
+    };
+  }
+
+  public async getMyMonthlyAttendance(
+    userId: string,
+    query: GetMyMonthlyAttendanceRequestDto,
+  ): Promise<GetMonthlyAttendanceResponseDto> {
+    // ユーザーが存在するか確認
+    await this.usersService.findOneById(userId);
+
+    // 月次勤怠を検索
+    let queryBuilder = this.monthlyAttendanceRepository
+      .createQueryBuilder('ma')
+      .where('ma.user_id = :userId', { userId })
+      .andWhere('ma.deleted_at IS NULL');
+
+    if (query.target_month) {
+      const targetMonth = DateUtil.convertTextToDate(query.target_month);
+      console.log(targetMonth);
+      queryBuilder = queryBuilder.andWhere('ma.target_month = :targetMonth', {
+        targetMonth,
+      });
+    }
+
+    const order = query.order.toUpperCase() as 'ASC' | 'DESC';
+    queryBuilder = queryBuilder.orderBy(query.order_by, order);
+
+    const allCount = await queryBuilder.getCount();
+
+    queryBuilder = queryBuilder
+      .limit(query.page_size)
+      .offset((query.page - 1) * query.page_size);
+
+    const monthlyAttendance = await queryBuilder.getMany();
+
+    return {
+      total: allCount,
+      monthly_attendance: monthlyAttendance,
     };
   }
 
