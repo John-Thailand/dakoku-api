@@ -16,6 +16,7 @@ export class AdminMonthlyTask {
   @Column({
     type: 'date',
     nullable: false,
+    unique: true,
   })
   target_month: Date;
 
