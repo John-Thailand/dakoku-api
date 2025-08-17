@@ -7,6 +7,7 @@ import { MailModule } from './mail/mail.module';
 import { AttendanceTypesModule } from './attendance-types/attendance-types.module';
 import { BatchProcessingModule } from './batch-processing/batch-processing.module';
 import { MonthlyAttendanceModule } from './monthly-attendance/monthly-attendance.module';
+import { AdminMonthlyTasksModule } from './admin-monthly-tasks/admin-monthly-tasks.module';
 import databaseConfig from './config/database.config';
 import environmentValidation from './config/environment.validation';
 import mailConfig from './config/mail.config';
@@ -48,6 +49,7 @@ const ENV = process.env.NODE_ENV;
     AttendanceTypesModule,
     BatchProcessingModule,
     MonthlyAttendanceModule,
+    AdminMonthlyTasksModule,
   ],
   controllers: [],
   providers: [],
