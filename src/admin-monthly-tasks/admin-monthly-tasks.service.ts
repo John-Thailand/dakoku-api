@@ -20,7 +20,11 @@ export class AdminMonthlyTasksService {
     try {
       return await this.adminMonthlyTasksRepository.save(adminMonthlyTask);
     } catch (error) {
-      throw new ConflictException('this admin monthly task already exists');
+      const code = error?.code;
+      if (code === 'ER_DUP_ENTRY') {
+        throw new ConflictException('admin monthly task already exists');
+      }
+      throw error;
     }
   }
 }
