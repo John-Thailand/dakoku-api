@@ -8,6 +8,8 @@ import { AdminMonthlyTask } from './admin-monthly-task.entity';
 import { IsNull, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DateUtil } from 'src/utils/date.util';
+import { GetAdminMonthlyTasksRequestDto } from './dtos/get-admin-monthly-tasks-request.dto';
+import { GetAdminMonthlyTasksResponseDto } from './dtos/get-admin-monthly-tasks-response.dto';
 
 @Injectable()
 export class AdminMonthlyTasksService {
@@ -67,5 +69,36 @@ export class AdminMonthlyTasksService {
         },
       );
     }
+  }
+
+  public async getAdminMonthlyTasks(
+    query: GetAdminMonthlyTasksRequestDto,
+  ): Promise<GetAdminMonthlyTasksResponseDto> {
+    let queryBuilder = this.adminMonthlyTasksRepository
+      .createQueryBuilder('amt')
+      .where('amt.deleted_at IS NULL');
+
+    if (query.target_month) {
+      const targetMonth = DateUtil.convertTextToDate(query.target_month);
+      queryBuilder = queryBuilder.andWhere('amt.target_month = :targetMonth', {
+        targetMonth,
+      });
+    }
+
+    const order = query.order.toUpperCase() as 'ASC' | 'DESC';
+    queryBuilder = queryBuilder.orderBy(query.order_by, order);
+
+    const allCount = await queryBuilder.getCount();
+
+    queryBuilder = queryBuilder
+      .limit(query.page_size)
+      .offset((query.page - 1) * query.page_size);
+
+    const adminMonthlyTasks = await queryBuilder.getMany();
+
+    return {
+      admin_monthly_tasks: adminMonthlyTasks,
+      total: allCount,
+    };
   }
 }
