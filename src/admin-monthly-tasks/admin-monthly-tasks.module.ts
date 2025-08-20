@@ -6,6 +6,7 @@ import { AdminMonthlyTasksController } from './admin-monthly-tasks.controller';
 import { ConfigModule } from '@nestjs/config';
 import jwtConfig from 'src/auth/config/jwt.config';
 import { JwtModule } from '@nestjs/jwt';
+import { MonthlyAttendanceModule } from 'src/monthly-attendance/monthly-attendance.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { JwtModule } from '@nestjs/jwt';
     // ConfigServiceからjwtConfigを読み取る
     // そのjwtConfigをJwtModuleに渡す
     JwtModule.registerAsync(jwtConfig.asProvider()),
+    MonthlyAttendanceModule,
   ],
   providers: [AdminMonthlyTasksService],
   exports: [AdminMonthlyTasksService],

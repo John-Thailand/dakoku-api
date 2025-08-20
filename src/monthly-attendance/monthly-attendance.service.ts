@@ -276,6 +276,15 @@ export class MonthlyAttendanceService {
     };
   }
 
+  public async getMonthlyAttendanceByTargetMonth(
+    targetMonth: Date,
+  ): Promise<MonthlyAttendance[]> {
+    return this.monthlyAttendanceRepository.findBy({
+      target_month: targetMonth,
+      deleted_at: IsNull(),
+    });
+  }
+
   public async getMyMonthlyAttendance(
     userId: string,
     query: GetMyMonthlyAttendanceRequestDto,
