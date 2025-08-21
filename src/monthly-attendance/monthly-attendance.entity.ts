@@ -5,12 +5,14 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
 import { MonthlyAttendanceStatus } from './enums/monthly-attendance-status.enum';
 import { User } from 'src/users/user.entity';
+import { MonthlyAttendanceRecord } from 'src/monthly-attendance-records/monthly-attendance-record.entity';
 
 @Entity('monthly_attendance')
 // 複合一意制約をエンティティクラスに設定する場合に使う
@@ -56,4 +58,10 @@ export class MonthlyAttendance {
 
   @DeleteDateColumn()
   deleted_at: Date;
+
+  @OneToMany(
+    () => MonthlyAttendanceRecord,
+    (monthly_attendance_record) => monthly_attendance_record.monthly_attendance,
+  )
+  monthly_attendance_records: MonthlyAttendanceRecord[];
 }
