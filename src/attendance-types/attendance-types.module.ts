@@ -20,5 +20,6 @@ import { JwtModule } from '@nestjs/jwt';
     // そのjwtConfigをJwtModuleに渡す
     JwtModule.registerAsync(jwtConfig.asProvider()),
   ],
+  exports: [AttendanceTypesService],
 })
 export class AttendanceTypesModule {}
