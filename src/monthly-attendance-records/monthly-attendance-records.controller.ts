@@ -1,4 +1,4 @@
-import { Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { MonthlyAttendanceRecordsService } from './monthly-attendance-records.service';
 import { REQUEST_USER_KEY } from 'src/auth/constants/constants';
@@ -14,6 +14,15 @@ export class MonthlyAttendanceRecordsController {
   public createWorkRecord(@Req() request) {
     const requestUser = request[REQUEST_USER_KEY];
     return this.monthlyAttendanceRecordsService.createWorkRecord(
+      requestUser.sub,
+    );
+  }
+
+  @Put('clock-out')
+  @UseGuards(AuthGuard)
+  public updateWorkRecord(@Req() request) {
+    const requestUser = request[REQUEST_USER_KEY];
+    return this.monthlyAttendanceRecordsService.updateWorkRecord(
       requestUser.sub,
     );
   }
