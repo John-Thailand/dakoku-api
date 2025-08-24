@@ -25,11 +25,13 @@ export class UpdateMyRecordDto {
   @Type(() => Date)
   @IsDate()
   @IsOptional()
+  // TODO: 2025年以上でなければならない
   start_time?: Date;
 
   @Type(() => Date)
   @IsDate()
   @IsOptional()
+  // TODO: 2025年以上でなければならない
   end_time?: Date;
 
   @IsString()
